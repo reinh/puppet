@@ -296,4 +296,36 @@ describe Puppet::Property do
             end
         end
     end
+
+    describe "#managed?" do
+      describe "when there is a should value and the property class is managed" do
+        it do
+          @property.stubs(:should).returns(true)
+          @class.stubs(:unmanaged).returns(false)
+          @property.managed?.should be_truthy
+        end
+      end
+      describe "when there is a should value and the property class is unmanaged" do
+        it do
+          @property.stubs(:should).returns(true)
+          @class.stubs(:unmanaged).returns(true)
+          @property.managed?.should be_falsy
+        end
+      end
+      describe "when there is no should value and the property class is managed" do
+        it do
+          @property.stubs(:should).returns(false)
+          @class.stubs(:unmanaged).returns(false)
+          @property.managed?.should be_falsy
+        end
+      end
+      describe "when there is no should value and the property class is unmanaged" do
+        it do
+          @property.stubs(:should).returns(false)
+          @class.stubs(:unmanaged).returns(true)
+          @property.managed?.should be_falsy
+        end
+      end
+    end
+
 end

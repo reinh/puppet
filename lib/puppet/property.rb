@@ -225,6 +225,11 @@ class Puppet::Property < Puppet::Parameter
         return false
     end
 
+    # Is this a managed property?
+    def managed?
+      not self.class.unmanaged and should
+    end
+
     # because the @should and @is vars might be in weird formats,
     # we need to set up a mechanism for pretty printing of the values
     # default to just the values, but this way individual properties can
