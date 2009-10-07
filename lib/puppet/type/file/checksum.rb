@@ -21,8 +21,6 @@ Puppet::Type.type(:file).newproperty(:checksum) do
 
     @event = :file_changed
 
-    @unmanaged = true
-
     @validtypes = %w{md5 md5lite timestamp mtime time}
 
     def self.validtype?(type)
@@ -192,6 +190,10 @@ Puppet::Type.type(:file).newproperty(:checksum) do
             # an event.
             return true
         end
+    end
+
+    def managed?
+        false
     end
 
     # Even though they can specify multiple checksums, the insync?
