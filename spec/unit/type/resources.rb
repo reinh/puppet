@@ -6,6 +6,24 @@ resources = Puppet::Type.type(:resources)
 
 # There are still plenty of tests to port over from test/.
 describe resources do
+    describe "#check(resource)" do
+        before do
+            @resources = Puppet::Type.type(:resources).new(:name => :host)
+            @resource = mock('Resource')
+        end
+
+        it "should return the value of the checked method if the checked method exists" do
+            checked_value = mock('Checked Value')
+            @resources.expects(:host_check).with(@resource).returns(checked_value)
+
+            @resources.check(@resource).should == checked_value
+        end
+
+        it "should return true if the checked method does not exist" do
+            @resources.check(@resource).should == true
+        end
+    end
+
     describe "when initializing" do
         it "should fail if the specified resource type does not exist" do
             Puppet::Type.stubs(:type).with("Resources").returns resources

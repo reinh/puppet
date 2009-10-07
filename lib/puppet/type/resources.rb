@@ -72,17 +72,9 @@ Puppet::Type.newtype(:resources) do
     end
 
     def check(resource)
-        unless defined? @checkmethod
-            @checkmethod = "%s_check" % self[:name]
-        end
-        unless defined? @hascheck
-            @hascheck = respond_to?(@checkmethod)
-        end
-        if @hascheck
-            return send(@checkmethod, resource)
-        else
-            return true
-        end
+        checkmethod = "#{self[:name]}_check"
+        return true unless respond_to?(checkmethod)
+        send(checkmethod, resource)
     end
 
     # Generate any new resources we need to manage.  This is pretty hackish
