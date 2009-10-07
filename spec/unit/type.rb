@@ -414,4 +414,31 @@ describe Puppet::Type::RelationshipMetaparam do
 
         param.validate_relationship
     end
+
+    describe "#managed?" do
+      before do
+        @resource = Puppet::Type.type(:mount).new(:name => "foo")
+        @managed = stub("Property", :managed? => true)
+        @unmanaged = stub("Property", :managed? => false)
+      end
+
+      it "should be true if any of its properties are managed" do
+        @resource.stubs(:properties).returns([@unmanaged, @managed, @unmanaged])
+        @resource.managed?.should be_truthy
+      end
+
+      it "should be false if no properties are managed" do
+        property = stub("Property", :managed? => false)
+        @resource.stubs(:properties).returns([@unmanaged, @unmanaged, @unmanaged])
+        @resource.managed?.should be_falsy
+      end
+
+      it "should not memoize if false" do
+        @resource.stubs(:properties).returns([@unmanaged])
+        @resource.managed?.should be_falsy
+
+        @resource.stubs(:properties).returns([@managed])
+        @resource.managed?.should be_truthy
+      end
+    end
 end

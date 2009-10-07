@@ -644,22 +644,7 @@ class Type
     # in order resolve other questions, such as finding a package
     # in a list
     def managed?
-        # Once an object is managed, it always stays managed; but an object
-        # that is listed as unmanaged might become managed later in the process,
-        # so we have to check that every time
-        if defined? @managed and @managed
-            return @managed
-        else
-            @managed = false
-            properties.each { |property|
-                s = property.should
-                if s and ! property.class.unmanaged
-                    @managed = true
-                    break
-                end
-            }
-            return @managed
-        end
+        @managed ||= properties.any?{|p| p.managed?}
     end
 
     ###############################
