@@ -51,4 +51,12 @@ Puppet[:vardir] = "/dev/null"
 # allows us the same behaviour but with a different method name.
 class Object
     alias :must :should
+
+    def truthy?
+      !!self
+    end
+
+    def falsy?
+      !truthy?
+    end
 end
