@@ -44,11 +44,7 @@ class Puppet::Indirector::REST < Puppet::Indirector::Terminus
             content_type = response['content-type'].gsub(/\s*;.*$/,'') # strip any appended charset
 
             # Convert the response to a deserialized object.
-            if multiple
-                model.convert_from_multiple(content_type, response.body)
-            else
-                model.convert_from(content_type, response.body)
-            end
+            model.convert(response.body, :format => content_type, :multiple => multiple)
         else
             # Raise the http error if we didn't get a 'success' of some kind.
             message = "Error %s on SERVER: %s" % [response.code, (response.body||'').empty? ? response.message : response.body]

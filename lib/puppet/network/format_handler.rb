@@ -5,6 +5,7 @@ require 'puppet/network/format'
 module Puppet::Network::FormatHandler
     class FormatError < Puppet::Error; end
 
+    #RH: FIXME: This should use super
     class FormatProtector
         attr_reader :format
 
@@ -91,6 +92,13 @@ module Puppet::Network::FormatHandler
     module ClassMethods
         def format_handler
             Puppet::Network::FormatHandler
+        end
+
+        def convert(data, options={})
+          multiple = options[:multiple]
+          format = options[:format]
+
+          multiple ? convert_from_multiple(format, data) : convert_from(format, data)
         end
 
         def convert_from(format, data)

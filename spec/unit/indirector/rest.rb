@@ -26,9 +26,16 @@ describe "a REST http call", :shared => true do
 end
 
 describe Puppet::Indirector::REST do
+    def stub_model(options={})
+      node = Puppet::Node
+      node.stubs({:supported_formats => %w{}, :convert_from => nil}.merge(options) )
+      node
+    end
+    private :stub_model
+
     before do
         Puppet::Indirector::Terminus.stubs(:register_terminus_class)
-        @model = stub('model', :supported_formats => %w{}, :convert_from => nil)
+        @model = stub_model
         @instance = stub('model instance', :name= => nil)
         @indirection = stub('indirection', :name => :mystuff, :register_terminus_type => nil, :model => @model)
         Puppet::Indirector::Indirection.stubs(:instance).returns(@indirection)
