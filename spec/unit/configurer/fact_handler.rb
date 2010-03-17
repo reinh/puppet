@@ -9,6 +9,8 @@ class FactHandlerTester
 end
 
 describe Puppet::Configurer::FactHandler do
+    include FactsHelper
+
     before do
         @facthandler = FactHandlerTester.new
     end
@@ -96,7 +98,7 @@ describe Puppet::Configurer::FactHandler do
 
     # I couldn't get marshal to work for this, only yaml, so we hard-code yaml.
     it "should serialize and CGI escape the fact values for uploading" do
-        facts = stub 'facts'
+        facts = stub_facts
         facts.expects(:support_format?).with(:b64_zlib_yaml).returns true
         facts.expects(:render).returns "my text"
         text = CGI.escape("my text")
@@ -107,7 +109,7 @@ describe Puppet::Configurer::FactHandler do
     end
 
     it "should properly accept facts containing a '+'" do
-        facts = stub 'facts'
+        facts = stub_facts
         facts.expects(:support_format?).with(:b64_zlib_yaml).returns true
         facts.expects(:render).returns "my+text"
         text = "my%2Btext"
@@ -118,7 +120,7 @@ describe Puppet::Configurer::FactHandler do
     end
 
     it "use compressed yaml as the serialization if zlib is supported" do
-        facts = stub 'facts'
+        facts = stub_facts
         facts.expects(:support_format?).with(:b64_zlib_yaml).returns true
         facts.expects(:render).with(:b64_zlib_yaml).returns "my text"
         text = CGI.escape("my text")
@@ -129,7 +131,7 @@ describe Puppet::Configurer::FactHandler do
     end
 
     it "should use yaml as the serialization if zlib is not supported" do
-        facts = stub 'facts'
+        facts = stub_facts
         facts.expects(:support_format?).with(:b64_zlib_yaml).returns false
         facts.expects(:render).with(:yaml).returns "my text"
         text = CGI.escape("my text")

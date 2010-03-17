@@ -9,16 +9,18 @@ require 'puppet/indirector/file_server'
 require 'puppet/file_serving/configuration'
 
 describe Puppet::Indirector::FileServer do
+    include IndirectionHelper
 
     before :each do
         Puppet::Indirector::Terminus.stubs(:register_terminus_class)
         @model = mock 'model'
-        @indirection = stub 'indirection', :name => :mystuff, :register_terminus_type => nil, :model => @model
-        Puppet::Indirector::Indirection.stubs(:instance).returns(@indirection)
+
+        indirection_name = :testing # the downcased, interned namespace of the class based on its to_s (see below)
+        @indirection = stub_indirection :name => indirection_name, :register_terminus_type => nil, :model => @model
 
         @file_server_class = Class.new(Puppet::Indirector::FileServer) do
             def self.to_s
-                "Testing::Mytype"
+                "Testing::Mytype" # gives us the :testing indirection name
             end
         end
 

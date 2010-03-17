@@ -297,10 +297,12 @@ describe "Puppet" do
             end
 
             describe "with detailed_exitcodes" do
+                include ReportHelper
+
                 it "should exit with report's computed exit status" do
                     Puppet.stubs(:[]).with(:noop).returns(false)
                     @puppet.options.stubs(:[]).with(:detailed_exitcodes).returns(true)
-                    report = stub 'report', :exit_status => 666
+                    report = stub_report :exit_status => 666
                     @transaction.stubs(:report).returns(report)
                     @puppet.expects(:exit).with(666)
 
@@ -310,7 +312,7 @@ describe "Puppet" do
                 it "should always exit with 0 if option is disabled" do
                     Puppet.stubs(:[]).with(:noop).returns(false)
                     @puppet.options.stubs(:[]).with(:detailed_exitcodes).returns(false)
-                    report = stub 'report', :exit_status => 666
+                    report = stub_report :exit_status => 666
                     @transaction.stubs(:report).returns(report)
                     @puppet.expects(:exit).with(0)
 
@@ -320,7 +322,7 @@ describe "Puppet" do
                 it "should always exit with 0 if --noop" do
                     Puppet.stubs(:[]).with(:noop).returns(true)
                     @puppet.options.stubs(:[]).with(:detailed_exitcodes).returns(true)
-                    report = stub 'report', :exit_status => 666
+                    report = stub_report :exit_status => 666
                     @transaction.stubs(:report).returns(report)
                     @puppet.expects(:exit).with(0)
 

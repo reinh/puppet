@@ -3,6 +3,8 @@
 #  Copyright (c) 2008. All rights reserved.
 
 describe "A Memory Terminus", :shared => true do
+    include RequestHelper
+
     it "should find no instances by default" do
         @searcher.find(@request).should be_nil
     end
@@ -15,7 +17,7 @@ describe "A Memory Terminus", :shared => true do
     it "should replace existing saved instances when a new instance with the same name is saved" do
         @searcher.save(@request)
         two = stub 'second', :name => @name
-        trequest = stub 'request', :key => @name, :instance => two
+        trequest = stub_request :key => @name, :instance => two
         @searcher.save(trequest)
         @searcher.find(@request).should equal(two)
     end

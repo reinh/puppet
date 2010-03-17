@@ -1,12 +1,14 @@
 #!/usr/bin/env ruby
 
-Dir.chdir(File.dirname(__FILE__)) { (s = lambda { |f| File.exist?(f) ? require(f) : Dir.chdir("..") { s.call(f) } }).call("spec/spec_helper.rb") }
+require File.dirname(__FILE__) + '/../../../spec_helper'
 
 require 'puppet/ssl/certificate'
 require 'puppet/network/server'
 require 'puppet/network/http/webrick/rest'
 
 describe "Certificate REST Terminus" do
+    include ModelHelper
+
     before do
         Puppet[:masterport] = 34343
         Puppet[:server] = "localhost"
@@ -44,7 +46,7 @@ describe "Certificate REST Terminus" do
         # LAK:NOTE We need to have a fake model here so that our indirected methods get
         # passed through REST; otherwise we'd be stubbing 'find', which would cause an immediate
         # return.
-        @mock_model = stub('faked model', :name => "certificate")
+        @mock_model = stub_model_class(:name => "certificate")
         Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
 
         Puppet::Network::HTTP::WEBrickREST.any_instance.stubs(:check_authorization).returns(true)

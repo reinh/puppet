@@ -7,6 +7,8 @@ require File.dirname(__FILE__) + '/../spec_helper'
 require 'puppet/configurer'
 
 describe Puppet::Configurer do
+    include ReportHelper
+
     before do
         Puppet.settings.stubs(:use).returns(true)
         @agent = Puppet::Configurer.new
@@ -73,6 +75,8 @@ describe Puppet::Configurer do
 end
 
 describe Puppet::Configurer, "when initializing a report" do
+    include ReportHelper
+
     it "should return an instance of a transaction report" do
         Puppet.settings.stubs(:use).returns(true)
         @agent = Puppet::Configurer.new
@@ -81,6 +85,10 @@ describe Puppet::Configurer, "when initializing a report" do
 end
 
 describe Puppet::Configurer, "when executing a catalog run" do
+    include CatalogHelper
+    include ReportHelper
+    include TransactionHelper
+
     before do
         Puppet.settings.stubs(:use).returns(true)
         @agent = Puppet::Configurer.new
@@ -98,14 +106,13 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should initialize a transaction report" do
-        report = stub 'report'
-        @agent.expects(:initialize_report).returns report
+        @agent.expects(:initialize_report)
 
         @agent.run
     end
 
     it "should set the report as a log destination" do
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
 
         Puppet::Util::Log.expects(:newdestination).with(report)
@@ -128,7 +135,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should apply the catalog with all options to :run" do
-        catalog = stub 'catalog', :retrieval_duration= => nil
+        catalog = stub_catalog :retrieval_duration= => nil
         @agent.expects(:retrieve_catalog).returns catalog
 
         catalog.expects(:apply).with { |args| args[:one] == true }
@@ -136,7 +143,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should accept a catalog and use it instead of retrieving a different one" do
-        catalog = stub 'catalog', :retrieval_duration= => nil
+        catalog = stub_catalog :retrieval_duration= => nil
         @agent.expects(:retrieve_catalog).never
 
         catalog.expects(:apply)
@@ -146,7 +153,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     it "should benchmark how long it takes to apply the catalog" do
         @agent.expects(:benchmark).with(:notice, "Finished catalog run")
 
-        catalog = stub 'catalog', :retrieval_duration= => nil
+        catalog = stub_catalog :retrieval_duration= => nil
         @agent.expects(:retrieve_catalog).returns catalog
 
         catalog.expects(:apply).never # because we're not yielding
@@ -160,7 +167,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should send the report" do
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
         @agent.expects(:send_report).with { |r, trans| r == report }
 
@@ -168,12 +175,12 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should send the transaction report with a reference to the transaction if a run was actually made" do
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
 
-        catalog = stub 'catalog', :retrieval_duration= => nil
+        catalog = stub_catalog :retrieval_duration= => nil
 
-        trans = stub 'transaction'
+        trans = stub_transaction(catalog)
         catalog.expects(:apply).returns trans
 
         @agent.expects(:send_report).with { |r, t| t == trans }
@@ -184,7 +191,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     it "should send the transaction report even if the catalog could not be retrieved" do
         @agent.expects(:retrieve_catalog).returns nil
 
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
         @agent.expects(:send_report)
 
@@ -194,7 +201,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     it "should send the transaction report even if there is a failure" do
         @agent.expects(:retrieve_catalog).raises "whatever"
 
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
         @agent.expects(:send_report)
 
@@ -202,7 +209,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should remove the report as a log destination when the run is finished" do
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
 
         Puppet::Util::Log.expects(:close).with(report)
@@ -211,7 +218,7 @@ describe Puppet::Configurer, "when executing a catalog run" do
     end
 
     it "should return the report as the result of the run" do
-        report = stub 'report'
+        report = stub_report
         @agent.expects(:initialize_report).returns report
 
         @agent.run.should equal(report)
@@ -219,12 +226,15 @@ describe Puppet::Configurer, "when executing a catalog run" do
 end
 
 describe Puppet::Configurer, "when sending a report" do
+    include ReportHelper
+    include TransactionHelper
+
     before do
         Puppet.settings.stubs(:use).returns(true)
         @configurer = Puppet::Configurer.new
 
-        @report = stub 'report'
-        @trans = stub 'transaction'
+        @report = stub_report
+        @trans = stub_transaction
     end
 
     it "should require a report" do
@@ -373,12 +383,14 @@ describe Puppet::Configurer, "when retrieving a catalog" do
 end
 
 describe Puppet::Configurer, "when converting the catalog" do
+    include CatalogHelper
+
     before do
         Puppet.settings.stubs(:use).returns(true)
         @agent = Puppet::Configurer.new
 
-        @catalog = Puppet::Resource::Catalog.new
-        @oldcatalog = stub 'old_catalog', :to_ral => @catalog
+        @catalog = stub_catalog
+        @oldcatalog = stub_catalog :to_ral => @catalog
     end
 
     it "should convert the catalog to a RAL-formed catalog" do

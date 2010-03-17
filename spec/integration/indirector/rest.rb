@@ -32,6 +32,8 @@ end
 
 
 describe Puppet::Indirector::REST do
+    include ModelHelper
+
     before do
         # Get a safe temporary file
         @tmpfile = Tempfile.new("webrick_integration_testing")
@@ -71,7 +73,7 @@ describe Puppet::Indirector::REST do
             # LAK:NOTE We need to have a fake model here so that our indirected methods get
             # passed through REST; otherwise we'd be stubbing 'find', which would cause an immediate
             # return.
-            @mock_model = stub('faked model', :name => "foo")
+            @mock_model = stub_model(:name => "foo")
             Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
 
             # do not trigger the authorization layer
@@ -116,7 +118,7 @@ describe Puppet::Indirector::REST do
 
             describe "when no matching model instance can be found" do
                 before :each do
-                    @mock_model = stub('faked model', :name => "foo", :find => nil)
+                    @mock_model = stub_model_class(:name => "foo", :find => nil)
                     Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
                 end
 
@@ -127,7 +129,7 @@ describe Puppet::Indirector::REST do
 
             describe "when an exception is encountered in looking up a model instance" do
                 before :each do
-                    @mock_model = stub('faked model', :name => "foo")
+                    @mock_model = stub_model_class(:name => "foo")
                     @mock_model.stubs(:find).raises(RuntimeError)
                     Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
                 end
@@ -176,7 +178,7 @@ describe Puppet::Indirector::REST do
 
             describe "when no matching model instance can be found" do
                 before :each do
-                    @mock_model = stub('faked model', :name => "foo", :find => nil)
+                    @mock_model = stub_model(:name => "foo", :find => nil)
                     Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
                 end
 
@@ -187,7 +189,7 @@ describe Puppet::Indirector::REST do
 
             describe "when an exception is encountered in looking up a model instance" do
                 before :each do
-                    @mock_model = stub('faked model')
+                    @mock_model = stub_model_class
                     @mock_model.stubs(:find).raises(RuntimeError)
                     Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
                 end
@@ -304,7 +306,7 @@ describe Puppet::Indirector::REST do
             # LAK:NOTE We need to have a fake model here so that our indirected methods get
             # passed through REST; otherwise we'd be stubbing 'find', which would cause an immediate
             # return.
-            @mock_model = stub('faked model', :name => "foo")
+            @mock_model = stub_model_class(:name => "foo")
             Puppet::Indirector::Request.any_instance.stubs(:model).returns(@mock_model)
 
             # do not trigger the authorization layer

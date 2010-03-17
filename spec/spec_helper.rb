@@ -21,6 +21,16 @@ require 'mocha'
 gem 'rspec', '=1.2.9'
 require 'spec/autorun'
 
+# Helpers
+require 'helpers/catalog_helper'
+require 'helpers/facts_helper'
+require 'helpers/indirection_helper'
+require 'helpers/model_helper'
+require 'helpers/node_helper'
+require 'helpers/report_helper'
+require 'helpers/request_helper'
+require 'helpers/transaction_helper'
+
 # So everyone else doesn't have to include this base constant.
 module PuppetSpec
 end

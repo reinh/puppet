@@ -187,7 +187,7 @@ describe "puppetd" do
             @puppetd.options.stubs(:[])
             Puppet.stubs(:info)
             FileTest.stubs(:exists?).returns(true)
-            Puppet.stubs(:[])
+            Puppet.stubs(:[]).returns('unknown')
             Puppet.stubs(:[]).with(:libdir).returns("/dev/null/lib")
             Puppet.settings.stubs(:print_config?)
             Puppet.settings.stubs(:print_config)
@@ -529,13 +529,15 @@ describe "puppetd" do
             end
 
             describe "and --detailed-exitcodes" do
+                include ReportHelper
+
                 before :each do
                     @puppetd.options.stubs(:[]).with(:detailed_exitcodes).returns(true)
                 end
 
                 it "should exit with report's computed exit status" do
                     Puppet.stubs(:[]).with(:noop).returns(false)
-                    report = stub 'report', :exit_status => 666
+                    report = stub_report :exit_status => 666
                     @agent.stubs(:run).returns(report)
                     @puppetd.expects(:exit).with(666)
 
@@ -544,7 +546,7 @@ describe "puppetd" do
 
                 it "should always exit with 0 if --noop" do
                     Puppet.stubs(:[]).with(:noop).returns(true)
-                    report = stub 'report', :exit_status => 666
+                    report = stub_report :exit_status => 666
                     @agent.stubs(:run).returns(report)
                     @puppetd.expects(:exit).with(0)
 

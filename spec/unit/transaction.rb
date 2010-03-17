@@ -116,11 +116,13 @@ describe Puppet::Transaction do
     end
 
     describe "when adding metrics to a report" do
+        include ReportHelper
+
         before do
             @catalog = Puppet::Resource::Catalog.new
             @transaction = Puppet::Transaction.new(@catalog)
 
-            @report = stub 'report', :newmetric => nil, :time= => nil
+            @report = stub_report :newmetric => nil, :time= => nil
         end
 
         [:resources, :time, :changes].each do |metric|

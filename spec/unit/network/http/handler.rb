@@ -9,6 +9,8 @@ class HttpHandled
 end
 
 describe Puppet::Network::HTTP::Handler do
+    include ModelHelper
+
     before do
         @handler = HttpHandled.new
     end
@@ -45,7 +47,7 @@ describe Puppet::Network::HTTP::Handler do
             @request     = stub('http request')
             @request.stubs(:[]).returns "foo"
             @response    = stub('http response')
-            @model_class = stub('indirected model class')
+            @model_class = stub_model_class
 
             @result = stub 'result', :render => "mytext"
 
@@ -215,7 +217,7 @@ describe Puppet::Network::HTTP::Handler do
             end
 
             it "should return a serialized object when a model find call succeeds" do
-                @model_instance = stub('model instance')
+                @model_instance = stub_model_instance
                 @model_instance.expects(:render).returns "my_rendered_object"
 
                 @handler.expects(:set_response).with { |response, body, status| body == "my_rendered_object" }

@@ -5,8 +5,11 @@ require File.dirname(__FILE__) + '/../../../spec_helper'
 require 'puppet/indirector/node/exec'
 
 describe Puppet::Node::Exec do
+    include IndirectionHelper
+    include NodeHelper
+
     before do
-        @indirection = mock 'indirection'
+        @indirection = stub_indirection
         Puppet.settings.stubs(:value).with(:external_nodes).returns("/echo")
         @searcher = Puppet::Node::Exec.new
     end
@@ -25,8 +28,8 @@ describe Puppet::Node::Exec do
 
     describe "when handling the results of the command" do
         before do
-            @node = stub 'node', :fact_merge => nil
             @name = "yay"
+            @node = stub_node :name => @name, :fact_merge => nil
             Puppet::Node.expects(:new).with(@name).returns(@node)
             @result = {}
             # Use a local variable so the reference is usable in the execute() definition.

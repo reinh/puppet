@@ -7,6 +7,8 @@ require 'puppet/resource/catalog'
 Puppet::Resource::Catalog.indirection.terminus(:compiler)
 
 describe Puppet::Resource::Catalog::Compiler do
+    include RequestHelper
+
     before do
         @catalog = Puppet::Resource::Catalog.new
 
@@ -36,7 +38,7 @@ describe Puppet::Resource::Catalog::Compiler do
 
     it "should filter out virtual resources when finding a catalog" do
         @one.virtual = true
-        request = stub 'request', :name => "mynode"
+        request = stub_request :name => "mynode"
         Puppet::Resource::Catalog.indirection.terminus.stubs(:extract_facts_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:node_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:compile).returns(@catalog)
@@ -46,7 +48,7 @@ describe Puppet::Resource::Catalog::Compiler do
 
     it "should not filter out exported resources when finding a catalog" do
         @one.exported = true
-        request = stub 'request', :name => "mynode"
+        request = stub_request :name => "mynode"
         Puppet::Resource::Catalog.indirection.terminus.stubs(:extract_facts_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:node_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:compile).returns(@catalog)
@@ -57,7 +59,7 @@ describe Puppet::Resource::Catalog::Compiler do
     it "should filter out virtual exported resources when finding a catalog" do
         @one.exported = true
         @one.virtual = true
-        request = stub 'request', :name => "mynode"
+        request = stub_request :name => "mynode"
         Puppet::Resource::Catalog.indirection.terminus.stubs(:extract_facts_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:node_from_request)
         Puppet::Resource::Catalog.indirection.terminus.stubs(:compile).returns(@catalog)
