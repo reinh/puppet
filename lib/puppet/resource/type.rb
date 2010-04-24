@@ -177,7 +177,7 @@ class Puppet::Resource::Type
         return nil unless parent
 
         unless @parent_type ||= resource_type_collection.send(type, parent)
-            fail Puppet::ParseError, "Could not find parent resource type '#{parent}'"
+            fail Puppet::ParseError, "Could not find parent resource type '#{parent}' of type #{type}"
         end
 
         @parent_type
@@ -209,12 +209,14 @@ class Puppet::Resource::Type
 
         scope.setvar("title", resource.title) unless set.include? :title
         scope.setvar("name", resource.name) unless set.include? :name
-        scope.class_set(self.name,scope) if hostclass?
+        scope.class_set(self.name,scope) if hostclass? or node?
     end
 
     # Create a new subscope in which to evaluate our code.
     def subscope(scope, resource)
-        scope.newscope :resource => resource, :namespace => self.namespace, :source => self
+        scope = scope.newscope :resource => resource, :namespace => self.namespace, :source => self
+        scope.nodescope = true if @type == :node
+        scope
     end
 
     # Check whether a given argument is valid.
@@ -251,8 +253,7 @@ class Puppet::Resource::Type
     end
 
     def evaluate_parent_type(resource)
-        #return unless klass = parent_type and parent_resource = resource.scope.compiler.catalog.resource(:class, klass.name)
-        return unless klass = parent_type and parent_resource = resource.catalog.resource(:class, klass.name)
+        return unless klass = parent_type and parent_resource = resource.scope.compiler.catalog.resource(:class, klass.name) || resource.scope.compiler.catalog.resource(:node, klass.name)
         parent_resource.evaluate unless parent_resource.evaluated?
         return parent_scope(resource.scope, klass)
     end
