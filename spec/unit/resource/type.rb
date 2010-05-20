@@ -394,6 +394,14 @@ describe Puppet::Resource::Type do
             @type.evaluate_code(@resource)
         end
 
+        it "should not create a subscope for the :main class" do
+            @resource.stubs(:title).returns(:main)
+            @type.expects(:subscope).never
+            @type.expects(:set_resource_parameters).with(@resource, @scope)
+
+            @type.evaluate_code(@resource)
+        end
+
         it "should store the class scope" do
             @type.evaluate_code(@resource)
             @scope.class_scope(@type).should be_instance_of(@scope.class)
@@ -408,7 +416,8 @@ describe Puppet::Resource::Type do
         it "should evaluate the AST code if any is provided" do
             code = stub 'code'
             @type.stubs(:code).returns code
-            code.expects(:safeevaluate)
+            @type.stubs(:subscope).returns stub_everything("subscope", :compiler => @compiler)
+            code.expects(:safeevaluate).with @type.subscope
 
             @type.evaluate_code(@resource)
         end
@@ -416,7 +425,6 @@ describe Puppet::Resource::Type do
         describe "and ruby code is provided" do
             it "should create a DSL Resource API and evaluate it" do
                 @type.stubs(:ruby_code).returns(proc { "foo" })
-
                 @api = stub 'api'
                 Puppet::DSL::ResourceAPI.expects(:new).with { |res, scope, code| code == @type.ruby_code }.returns @api
                 @api.expects(:evaluate)
@@ -434,7 +442,6 @@ describe Puppet::Resource::Type do
         describe "and it has a parent class" do
             before do
                 @parent_type = Puppet::Resource::Type.new(:hostclass, "parent")
-                @compiler
                 @type.parent = "parent"
                 @parent_resource = Puppet::Parser::Resource.new(:class, "parent", :scope => @scope)
 
@@ -442,6 +449,41 @@ describe Puppet::Resource::Type do
 
                 @type.resource_type_collection = @scope.known_resource_types
                 @type.resource_type_collection.add @parent_type
+            end
+
+            it "should evaluate the parent's resource" do
+                @type.evaluate_code(@resource)
+
+                @scope.class_scope(@parent_type).should_not be_nil
+            end
+
+            it "should not evaluate the parent's resource if it has already been evaluated" do
+                @parent_resource.evaluate
+
+                @parent_resource.expects(:evaluate).never
+
+                @type.evaluate_code(@resource)
+            end
+
+            it "should use the parent's scope as its base scope" do
+                @type.evaluate_code(@resource)
+
+                @scope.class_scope(@type).parent.object_id.should == @scope.class_scope(@parent_type).object_id
+            end
+        end
+
+        describe "and it has a parent node" do
+            before do
+                @type = Puppet::Resource::Type.new(:node, "foo")
+                @parent_type = Puppet::Resource::Type.new(:node, "parent")
+                @type.parent = "parent"
+                @parent_resource = Puppet::Parser::Resource.new(:node, "parent", :scope => @scope)
+
+                @compiler.add_resource @scope, @parent_resource
+
+                @type.resource_type_collection = @scope.known_resource_types
+                @type.resource_type_collection.stubs(:node).with("parent").returns(@parent_type)
+                @type.resource_type_collection.stubs(:node).with("Parent").returns(@parent_type)
             end
 
             it "should evaluate the parent's resource" do
