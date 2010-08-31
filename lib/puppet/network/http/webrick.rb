@@ -60,9 +60,7 @@ class Puppet::Network::HTTP::WEBrick
   end
 
   def listening?
-    @mutex.synchronize do
-      @listening
-    end
+    @listening
   end
 
   # Configure our http log file.
