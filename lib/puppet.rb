@@ -4,6 +4,14 @@ begin
 rescue LoadError
 end
 
+# Require thread once here and try to require fastthread.
+require 'thread'
+begin
+  require 'fastthread'
+rescue LoadError
+  Puppet.notice 'please install the "fastthread" library for Ruby prior to 1.8.7. See #4669'
+end
+
 # see the bottom of the file for further inclusions
 require 'singleton'
 require 'facter'

@@ -2,7 +2,6 @@ require 'webrick'
 require 'webrick/https'
 require 'puppet/network/http/webrick/rest'
 require 'puppet/network/xmlrpc/webrick_servlet'
-require 'thread'
 
 require 'puppet/ssl/certificate'
 require 'puppet/ssl/certificate_revocation_list'
