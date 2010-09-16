@@ -78,6 +78,8 @@ module Puppet::Rails
   def self.init
     raise Puppet::DevError, "No activerecord, cannot init Puppet::Rails" unless Puppet.features.rails?
 
+    require 'lib/puppet/rails/activerecord_connections' # Patch for #3238
+
     connect
 
     unless ActiveRecord::Base.connection.tables.include?("resources")
